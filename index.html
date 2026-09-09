@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Herramientas SBG - Occidente</title>
+<!-- Librerías Externas requeridas por las herramientas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --panel: #ffffff;
+    --ink: #2b2620;
+    --muted: #8a8175;
+    --accent: #8b3a2f;
+    --accent2: #5c6b4f;
+    --line: #e2dccf;
+    --sub: #5b6672;
+    --accent-dark: #1f4d36;
+    --accent-soft: #e7f3ec;
+    --bar: #3f8f66;
+    --mono: "Consolas", "SFMono-Regular", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  /* Header y Navegación Principal */
+  header {
+    background: #2b2620;
+    color: #fff;
+    padding: 16px 24px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .header-title {
+    font-size: 1.3rem;
+    font-family: 'Georgia', serif;
+    margin: 0 0 12px;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    background: #3a342c;
+    color: #d2c9bd;
+    border: none;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-tab:hover { background: #4a4338; color: #fff; }
+  .nav-tab.active { background: var(--bg); color: var(--ink); }
+
+  /* Contenedores de Tab */
+  .tab-content {
+    display: none;
+    padding: 24px;
+    max-width: 1050px;
+    margin: 0 auto;
+  }
+  .tab-content.active { display: block; }
+
+  /* Estilos Comunes */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .panel h2 {
+    font-size: 1rem;
+    margin: 0 0 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .subtitle { color: var(--sub); font-size: 13px; margin: 0 0 20px; }
+  button {
+    font-family: inherit;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  button.secondary { background: var(--accent2); }
+  button:hover { opacity: .9; }
+
+  /* Estilos Calculadora Precios */
+  textarea.code-input {
+    width: 100%; min-height: 140px; font-family: 'Courier New', monospace; font-size: .85rem;
+    padding: 10px; border: 1px solid var(--line); border-radius: 6px; resize: vertical; background: #fbfaf7;
+  }
+  .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  label { font-size: .85rem; color: var(--muted); }
+  select, input[type=text], input[type=number] {
+    padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font-size: .9rem;
+  }
+  table.p-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  table.p-table th, table.p-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  table.p-table th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tfoot td { font-weight: bold; border-top: 2px solid var(--ink); }
+  .discount-badge { display: inline-block; background: #f0ece3; color: var(--ink); padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+  .kit-badge { display: inline-block; background: #eae2d3; color: var(--accent); padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+  .tiny-toggle { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 3px 7px; font-size: .7rem; border-radius: 4px; margin-top: 4px; display: block; }
+  .manual-row { display: grid; grid-template-columns: 1.1fr 2fr .7fr .9fr .8fr 1.1fr auto; gap: 8px; margin-top: 10px; align-items: end; }
+  .public-val { color: var(--accent); font-weight: bold; }
+  .del { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 4px 8px; font-size: .75rem; }
+  .hint { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+  .dropzone { border: 2px dashed var(--line); border-radius: 8px; padding: 26px; text-align: center; color: var(--muted); cursor: pointer; background: #fbfaf7; }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: #f7efe9; }
+  .print-header { display: none; }
+
+  /* Estilos Reportes de Ventas */
+  .upload-box { border: 1.5px dashed var(--line); border-radius: 6px; padding: 14px; background: #fafbfc; max-width: 520px; }
+  .filename { font-size: 11.5px; color: var(--accent-dark); margin-top: 6px; min-height: 14px; }
+  .status-line { font-size: 12.5px; color: var(--sub); margin-top: 8px; min-height: 16px; }
+  .status-line.error { color: #b3311e; }
+  .period-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+  .seg { display: flex; border: 1px solid var(--accent); border-radius: 5px; overflow: hidden; }
+  .seg button { border: none; background: #fff; color: var(--accent-dark); padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .seg button.active { background: var(--accent); color: #fff; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; margin-bottom: 6px; }
+  .card { background: #fbfcfc; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .card .label { font-size: 11px; color: var(--sub); text-transform: uppercase; }
+  .card .value { font-size: 19px; font-weight: 700; margin-top: 4px; }
+  table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; background: #fff; }
+  table.data th, table.data td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; }
+  table.data th { background: #eef1f3; font-weight: 600; }
+  table.data td.num, table.data th.num { text-align: right; font-family: var(--mono); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
+  .chart-wrap { overflow-x: auto; }
+  .bar-label { font-size: 10px; fill: var(--sub); }
+  .report-footer { display: flex; align-items: center; gap: 14px; padding: 16px 20px; margin-top: 6px; border-top: 2px solid var(--accent); }
+
+  /* Estilos Sumador */
+  .sumador-ta { width: 100%; height: 220px; padding: 12px; font-size: 15px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+  .sumador-res { height: 120px; background: #fff; font-family: var(--mono); }
+  .total-sum { font-size: 22px; font-weight: bold; margin-top: 15px; color: var(--accent); }
+
+  /* Impresión */
+  @media print {
+    .no-print, header { display: none !important; }
+    body { padding: 0; background: #fff; }
+    .panel { border: none; box-shadow: none; padding: 0; margin-bottom: 10px; }
+    .print-header { display: block; margin-bottom: 16px; border-bottom: 2px solid #2b2620; padding-bottom: 10px; }
+    .print-header .company { font-weight: bold; font-size: 1.1rem; }
+    .print-header .meta { color: #8a8175; font-size: .85rem; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="no-print">
+  <div class="header-title">Sociedad Bíblica de Guatemala — Centro de Distribución Occidente</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="openTab('tab-precios', this)">1. Calculadora de Precios</button>
+    <button class="nav-tab" onclick="openTab('tab-ventas', this)">2. Reporte de Ventas</button>
+    <button class="nav-tab" onclick="openTab('tab-sumador', this)">3. Sumador de Valores</button>
+  </div>
+</header>
+
+<!-- ==================== TAB 1: CALCULADORA DE PRECIOS ==================== -->
+<div id="tab-precios" class="tab-content active">
+  <h1 class="no-print" style="font-size:1.5rem; margin:0 0 4px;">Calculadora de Precio Público</h1>
+  <div class="sub no-print">Subí el PDF de la factura/cotización o pegá el texto para calcular el precio público.</div>
+
+  <div class="panel no-print">
+    <h2>1. Subir factura (PDF)</h2>
+    <div class="row" style="margin-top:0;">
+      <label>Descuento a aplicar a TODA la factura:
+        <select id="globalDiscount"></select>
+      </label>
+    </div>
+    <div class="hint">Este selector controla el descuento de todos los artículos automáticamente.</div>
+    <div id="dropZone" class="dropzone" style="margin-top:10px;">
+      <div id="dropText">Arrastrá el PDF aquí, o hacé clic para elegirlo</div>
+      <input type="file" id="pdfInput" accept="application/pdf" style="display:none;">
+    </div>
+    <div id="pdfStatus" class="hint"></div>
+    <div class="hint" style="margin-top:14px;">¿No se pudo leer el PDF? Pegá el texto manualmente aquí abajo:</div>
+    <textarea id="raw" class="code-input" placeholder="Pegá aquí el texto copiado del PDF..."></textarea>
+    <div class="row">
+      <button id="parseBtn">Analizar texto pegado</button>
+      <button id="clearBtn" class="secondary">Limpiar todo</button>
+    </div>
+  </div>
+
+  <div class="panel no-print">
+    <h2>2. Agregar ítem manual (opcional)</h2>
+    <div class="manual-row">
+      <div><label>Código</label><input type="text" id="mCode" placeholder="7899938..."></div>
+      <div><label>Descripción</label><input type="text" id="mDesc" placeholder="Descripción"></div>
+      <div><label>Cant.</label><input type="number" id="mQty" value="1" min="1"></div>
+      <div><label>Precio c/desc.</label><input type="number" id="mPrice" step="0.01" placeholder="0.00"></div>
+      <div><label>Desc. %</label><select id="mDiscount"></select></div>
+      <div><label><input type="checkbox" id="mKit" style="width:auto;"> Es KIT</label></div>
+      <button id="addManualBtn">Agregar</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row no-print" style="justify-content:space-between; margin-top:0;">
+      <h2 style="margin:0;">3. Resultado</h2>
+      <div class="row" style="margin:0;">
+        <label>Cliente / Referencia:
+          <input type="text" id="clientRef" placeholder="Nombre del cliente">
+        </label>
+        <button id="printBtn" class="secondary">Imprimir / PDF</button>
+        <button id="whatsappBtn" class="secondary">Compartir WhatsApp</button>
+      </div>
+    </div>
+    <div class="print-header">
+      <div class="company">Sociedad Bíblica de Guatemala — Centro de Distribución Occidente</div>
+      <div class="meta" id="printMeta"></div>
+    </div>
+    <div id="resultArea"><div style="color:var(--muted); font-style:italic; padding:20px; text-align:center;">Aún no hay artículos.</div></div>
+  </div>
+</div>
+
+<!-- ==================== TAB 2: REPORTE DE VENTAS ==================== -->
+<div id="tab-ventas" class="tab-content">
+  <h1 style="font-size:20px; margin:0 0 4px;">Reporte de Ventas por Periodo</h1>
+  <p class="subtitle">Sube tu Reporte de Ventas mensual (.xlsx) y genera el resumen de ventas.</p>
+
+  <div class="panel no-print">
+    <h2>1. Sube el archivo</h2>
+    <div class="upload-box">
+      <label for="fileVentas">Reporte de Ventas (.xlsx, una hoja por día)</label>
+      <input type="file" id="fileVentas" accept=".xlsx,.xls">
+      <div class="filename" id="fileVentasName"></div>
+    </div>
+    <div class="status-line" id="statusLine"></div>
+  </div>
+
+  <div class="panel no-print" id="configPanel" style="display:none;">
+    <h2>2. Vendedores a incluir</h2>
+    <div id="vendorFilterWrap"></div>
+  </div>
+
+  <div class="panel no-print" id="ivaPanel" style="display:none;">
+    <h2>3. IVA</h2>
+    <div class="period-bar">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+        <input type="checkbox" id="ivaCheckbox" checked> Los montos del reporte ya incluyen IVA — calcular total neto
+      </label>
+      <span style="font-size:12.5px;color:var(--sub);">Tasa:</span>
+      <input type="text" id="ivaRate" value="12" style="width:50px;text-align:center;"> %
+    </div>
+  </div>
+
+  <div class="panel no-print" id="clientesDbPanel">
+    <h2>4. Base de clientes / distribuidores (opcional)</h2>
+    <div class="upload-box">
+      <label for="fileClientesDb">Catálogo de clientes (.xlsx)</label>
+      <input type="file" id="fileClientesDb" accept=".xlsx,.xls">
+      <div class="filename" id="clientesDbStatus"></div>
+    </div>
+    <button class="secondary" id="btnClearClientesDb" style="margin-top:10px;">Quitar base guardada</button>
+  </div>
+
+  <div class="panel no-print" id="wholesalePanel" style="display:none;">
+    <h2>5. Posibles nuevos mayoristas</h2>
+    <div class="period-bar">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+        <input type="checkbox" id="wholesaleCheckbox" checked> Detectar posibles nuevos mayoristas
+      </label>
+      <span>Monto mín:</span> <input type="text" id="wholesaleMin" value="3000" style="width:70px;">
+      <span>Monto máx:</span> <input type="text" id="wholesaleMax" value="15000" style="width:70px;">
+    </div>
+  </div>
+
+  <div class="panel no-print" id="periodPanel" style="display:none;">
+    <h2>6. Periodo del reporte</h2>
+    <div class="period-bar">
+      <div class="seg" id="modeSeg">
+        <button data-mode="mes" class="active">Mes completo</button>
+        <button data-mode="semana">Por semana</button>
+        <button data-mode="quincena">Por quincena</button>
+      </div>
+      <select id="periodSelect" style="display:none;"></select>
+      <input type="text" id="empresaLabel" placeholder="Encabezado opcional" style="min-width:200px;">
+      <button id="btnGenerate">Generar reporte</button>
+      <button class="secondary" id="btnPrintReport">Imprimir / PDF</button>
+    </div>
+  </div>
+
+  <div id="results" style="display:none;">
+    <div class="panel">
+      <h2 id="reportTitle">Resumen del periodo</h2>
+      <div class="hint" id="reportNote" style="margin-bottom:12px;"></div>
+      <div class="cards" id="cardsWrap"></div>
+    </div>
+    <div class="panel">
+      <h2>Ventas por día</h2>
+      <div class="chart-wrap" id="chartWrap"></div>
+    </div>
+    <div class="panel">
+      <h2>Ventas por Vendedor</h2>
+      <div id="vendorTableWrap"></div>
+    </div>
+    <div class="panel" id="tarifaPanel" style="display:none;">
+      <h2>Ventas por Tarifa / Categoría</h2>
+      <div class="hint" id="tarifaNote" style="margin-bottom:8px;"></div>
+      <div id="tarifaWrap"></div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>Top 15 por N° de Compras</h2>
+        <div id="topFreqWrap"></div>
+      </div>
+      <div class="panel">
+        <h2>Top 15 por Monto Comprado</h2>
+        <div id="topAmtWrap"></div>
+      </div>
+    </div>
+    <div class="panel" id="wholesaleResultsPanel" style="display:none;">
+      <h2 id="wholesaleTitle">Posibles nuevos mayoristas</h2>
+      <div class="hint" id="wholesaleNote" style="margin-bottom:8px;"></div>
+      <div id="wholesaleWrap"></div>
+    </div>
+    <div class="panel no-print">
+      <button class="secondary" id="btnDownloadXlsx">Descargar Excel (.xlsx)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 3: SUMADOR DE VALORES ==================== -->
+<div id="tab-sumador" class="tab-content">
+  <h1 style="font-size:1.5rem; margin:0 0 4px;">Sumador de Valores</h1>
+  <p class="subtitle">Pegá tus valores uno debajo del otro. Podés incluir Q, comas o tablas copiadas desde Excel.</p>
+
+  <div class="panel">
+    <textarea id="sumEntrada" class="sumador-ta" placeholder="Ejemplo:&#10;Q1,250.00&#10;Q500.00&#10;2,350.50"></textarea>
+    <div class="row">
+      <button onclick="procesarSumador()">Procesar valores</button>
+      <button class="secondary" onclick="copiarSumador()">Copiar resultado</button>
+      <button class="del" style="padding:9px 16px;" onclick="limpiarSumador()">Limpiar</button>
+    </div>
+    <div style="margin-top:20px;">
+      <label style="font-weight:bold; display:block; margin-bottom:6px;">Resultado para Excel:</label>
+      <textarea id="sumSalida" class="sumador-ta sumador-res" readonly></textarea>
+      <div class="total-sum">Total: <span id="sumTotal">Q0.00</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Script Principal y Lógica Integrada -->
+<script>
+// --- LÓGICA DE NAVEGACIÓN ENTRE PESTAÑAS ---
+function openTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// --- TAB 1: CALCULADORA DE PRECIOS ---
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const DISCOUNTS = [15,25,30,32,35,39,40,42,46,48];
+let items = [];
+
+function fillDiscountSelect(sel, def){
+  sel.innerHTML = DISCOUNTS.map(d => `<option value="${d}" ${d===def?'selected':''}>${d}%</option>`).join('');
+}
+fillDiscountSelect(document.getElementById('globalDiscount'), 48);
+fillDiscountSelect(document.getElementById('mDiscount'), 48);
+
+function isKitDesc(desc){ return /\bkit\b/i.test(desc || ''); }
+function publicPrice(price, discountPct){ return price / (1 - discountPct/100); }
+function money(n){ return 'Q ' + n.toLocaleString('es-GT', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function parseInvoice(text, defaultDiscount){
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length);
+  const lineRe = /^(\d+)\s*x\s*([\d,]+\.\d{2})\s*=\s*Q\s*([\d,]+\.\d{2})/i;
+  const codeRe = /^\d{8,14}$/;
+  const parsed = [];
+  let pendingCode = null, descBuffer = [];
+
+  for (const line of lines){
+    const qtyMatch = line.match(lineRe);
+    if (qtyMatch){
+      const qty = parseInt(qtyMatch[1], 10);
+      const unitPrice = parseFloat(qtyMatch[2].replace(/,/g,''));
+      const desc = descBuffer.join(' ').trim();
+      parsed.push({ code: pendingCode || '', desc, qty, price: unitPrice, override: null, convert: !isKitDesc(desc) });
+      pendingCode = null; descBuffer = [];
+      continue;
+    }
+    if (codeRe.test(line)){ pendingCode = line; descBuffer = []; continue; }
+    if (/^(Sociedad|NIT|CENTRO|FEL|FACTURA|Serie:|Número:|Fecha|Teléfono|Nombre:|Dirección|Total:|Certificador:|GRACIAS)/i.test(line)) continue;
+    descBuffer.push(line);
+  }
+  return parsed;
+}
+
+function parseQuotation(text, defaultDiscount){
+  const rawLines = text.split('\n').map(l => l.trim()).filter(l => l.length);
+  const rowARe = /^\[([^\]]+)\]\s*(.*?)\s*(\d+(?:\.\d+)?)\s+([\d,]+\.\d+)\s+IVA\s*por\s+Q\s*([\d,]+\.\d{2})\s*$/i;
+  const parsed = [];
+
+  for (let i = 0; i < rawLines.length; i++){
+    const m = rawLines[i].match(rowARe);
+    if (!m) continue;
+    const code = m[1].trim();
+    let desc = m[2].trim();
+    const qty = parseFloat(m[3]);
+    const price = parseFloat(m[4].replace(/,/g,''));
+    const next = rawLines[i+1] || '';
+    if (!/^\[/.test(next)){
+      const contMatch = next.match(/^(.*?)\s*Unit\(s\)/i);
+      if (contMatch){
+        const extra = contMatch[1].trim();
+        if (extra) desc = (desc + ' ' + extra).trim();
+        i++;
+      }
+    }
+    parsed.push({ code, desc, qty, price, override: null, convert: !isKitDesc(desc) });
+  }
+  return parsed;
+}
+
+function parseDocument(text, defaultDiscount){
+  const looksLikeQuotation = /Quotation\s*#|IVA\s*por\s*Pagar|Presupuesto/i.test(text);
+  if (looksLikeQuotation){
+    const q = parseQuotation(text, defaultDiscount);
+    if (q.length > 0) return q;
+  }
+  const f = parseInvoice(text, defaultDiscount);
+  if (f.length > 0) return f;
+  return looksLikeQuotation ? f : parseQuotation(text, defaultDiscount);
+}
+
+function renderPrecios(){
+  const area = document.getElementById('resultArea');
+  if (items.length === 0){
+    area.innerHTML = '<div style="color:var(--muted); font-style:italic; padding:20px; text-align:center;">Aún no hay artículos. Analizá una factura o agregá uno manual.</div>';
+    return;
+  }
+  const globalD = parseInt(document.getElementById('globalDiscount').value, 10);
+  let totalPublic = 0, totalConDesc = 0;
+  const rows = items.map((it, idx) => {
+    const d = it.override != null ? it.override : globalD;
+    const isFixed = it.convert === false;
+    const unitPublic = isFixed ? it.price : publicPrice(it.price, d);
+    const pub = unitPublic * it.qty;
+    totalPublic += pub; totalConDesc += (it.price * it.qty);
+    const badge = isFixed ? '<span class="kit-badge">KIT · fijo</span>' : `<span class="discount-badge">${d}%</span>`;
+    const toggleLabel = isFixed ? 'Convertir con %' : 'Fijar (no convertir)';
+    return `<tr>
+      <td style="font-family:var(--mono); font-size:.78rem;">${it.code || '—'}</td>
+      <td style="max-width:260px;">${it.desc || '—'}</td>
+      <td class="num">${it.qty}</td>
+      <td class="num no-print">${money(it.price)}</td>
+      <td class="no-print">${badge}<button class="tiny-toggle" onclick="toggleConvert(${idx})">${toggleLabel}</button></td>
+      <td class="num public-val">${money(unitPublic)}</td>
+      <td class="num public-val">${money(pub)}</td>
+      <td class="no-print"><button class="del" onclick="removeItem(${idx})">Quitar</button></td>
+    </tr>`;
+  }).join('');
+
+  area.innerHTML = `
+    <table class="p-table">
+      <thead><tr>
+        <th>Código</th><th>Descripción</th><th class="num">Cant.</th>
+        <th class="num no-print">Precio c/desc.</th><th class="no-print">Desc.</th>
+        <th class="num">Público (u.)</th><th class="num">Público (total)</th><th class="no-print"></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr><td colspan="3"></td><td class="num no-print">${money(totalConDesc)}</td><td class="no-print"></td>
+        <td class="num">Total:</td><td class="num">${money(totalPublic)}</td><td class="no-print"></td></tr>
+      </tfoot>
+    </table>`;
+}
+
+function toggleConvert(idx){ items[idx].convert = !(items[idx].convert !== false); renderPrecios(); }
+function removeItem(idx){ items.splice(idx,1); renderPrecios(); }
+document.getElementById('globalDiscount').addEventListener('change', renderPrecios);
+
+document.getElementById('printBtn').addEventListener('click', () => {
+  if (!items.length) return alert('Analizá una factura primero.');
+  const ref = document.getElementById('clientRef').value.trim();
+  const today = new Date().toLocaleDateString('es-GT', {year:'numeric', month:'long', day:'numeric'});
+  document.getElementById('printMeta').textContent = (ref ? `Cliente: ${ref} — ` : '') + `Fecha: ${today}`;
+  window.print();
+});
+
+async function extractPdfText(file){
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let fullText = '';
+  for (let p = 1; p <= pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const rows = [];
+    for (const item of content.items){
+      if (!item.str.trim()) continue;
+      const y = Math.round(item.transform[5]);
+      let row = rows.find(r => Math.abs(r.y - y) < 3);
+      if (!row){ row = {y, parts: []}; rows.push(row); }
+      row.parts.push({x: item.transform[4], str: item.str});
+    }
+    rows.sort((a,b) => b.y - a.y);
+    for (const row of rows){
+      row.parts.sort((a,b) => a.x - b.x);
+      fullText += row.parts.map(p => p.str).join(' ').trim() + '\n';
+    }
+  }
+  return fullText;
+}
+
+const dropZone = document.getElementById('dropZone');
+const pdfInput = document.getElementById('pdfInput');
+dropZone.addEventListener('click', () => pdfInput.click());
+pdfInput.addEventListener('change', (e) => { if (e.target.files[0]) handlePdfFile(e.target.files[0]); });
+
+function handlePdfFile(file){
+  const status = document.getElementById('pdfStatus');
+  status.textContent = 'Leyendo PDF...';
+  extractPdfText(file).then(text => {
+    document.getElementById('raw').value = text;
+    const defaultDiscount = parseInt(document.getElementById('globalDiscount').value, 10);
+    const parsed = parseDocument(text, defaultDiscount);
+    if (!parsed.length){ status.textContent = 'No se detectaron ítems en el PDF.'; return; }
+    items = parsed; renderPrecios();
+    status.textContent = `Cargados ${parsed.length} artículos.`;
+  }).catch(err => { status.textContent = 'No se pudo leer el PDF. Pegá el texto abajo.'; });
+}
+
+document.getElementById('parseBtn').addEventListener('click', () => {
+  const text = document.getElementById('raw').value;
+  const defaultDiscount = parseInt(document.getElementById('globalDiscount').value, 10);
+  items = parseDocument(text, defaultDiscount);
+  renderPrecios();
+});
+document.getElementById('clearBtn').addEventListener('click', () => { document.getElementById('raw').value = ''; items = []; renderPrecios(); });
+
+document.getElementById('addManualBtn').addEventListener('click', () => {
+  const code = document.getElementById('mCode').value.trim();
+  const desc = document.getElementById('mDesc').value.trim();
+  const qty = parseInt(document.getElementById('mQty').value, 10) || 1;
+  const price = parseFloat(document.getElementById('mPrice').value);
+  const discount = parseInt(document.getElementById('mDiscount').value, 10);
+  const globalD = parseInt(document.getElementById('globalDiscount').value, 10);
+  if (!price || price <= 0) return alert('Ingresá un precio válido.');
+  items.push({code, desc, qty, price, override: (discount !== globalD) ? discount : null, convert: !document.getElementById('mKit').checked});
+  renderPrecios();
+});
+
+// --- TAB 2: REPORTE DE VENTAS ---
+let ALL_TX = [], CURRENT_MODE = 'mes', PERIODS = [], SELECTED_VENDORS = new Set(), CLIENTES_DB_INDEX = new Map();
+
+function normalizeName(s){
+  return (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function parseVentasWorkbook(wb){
+  const tx = [];
+  wb.SheetNames.forEach(sheetName => {
+    const ws = wb.Sheets[sheetName];
+    const aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
+    let headerIdx = -1;
+    for(let i=0; i<Math.min(5,aoa.length); i++){
+      if(typeof aoa[i][0] === 'string' && aoa[i][0].trim().toLowerCase().startsWith('fecha')){ headerIdx = i; break; }
+    }
+    if(headerIdx === -1) return;
+    for(let i=headerIdx+1; i<aoa.length; i++){
+      const row = aoa[i];
+      if(!row || !(row[0] instanceof Date) || isNaN(row[0])) continue;
+      if(typeof row[6] !== 'number' || isNaN(row[6])) continue;
+      tx.push({ date: row[0], numAsiento: row[1]||'', numFactura: row[2]||'', idCliente: row[3]||'', nombreCliente: row[4]||'', vendedor: row[5]||'', total: row[6] });
+    }
+  });
+  return tx;
+}
+
+document.getElementById('fileVentas').addEventListener('change', async e => {
+  const file = e.target.files[0]; if(!file) return;
+  document.getElementById('statusLine').textContent = 'Cargando...';
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type:'array', cellDates:true});
+  ALL_TX = parseVentasWorkbook(wb);
+  document.getElementById('statusLine').textContent = `Listo: ${ALL_TX.length} facturas leídas.`;
+  
+  // Renderizar opciones de vendedores
+  const counts = new Map();
+  ALL_TX.forEach(t => {
+    const k = t.vendedor || 'Sin asignar';
+    counts.set(k, (counts.get(k)||0) + 1);
+  });
+  SELECTED_VENDORS = new Set(counts.keys());
+  const wrap = document.getElementById('vendorFilterWrap');
+  wrap.innerHTML = '';
+  counts.forEach((cnt, name) => {
+    wrap.innerHTML += `<label><input type="checkbox" checked onchange="toggleVendor('${name}', this.checked)"> ${name} (${cnt})</label><br>`;
+  });
+  
+  document.getElementById('configPanel').style.display='block';
+  document.getElementById('ivaPanel').style.display='block';
+  document.getElementById('wholesalePanel').style.display='block';
+  document.getElementById('periodPanel').style.display='block';
+});
+
+function toggleVendor(name, checked){
+  if(checked) SELECTED_VENDORS.add(name); else SELECTED_VENDORS.delete(name);
+}
+
+document.getElementById('btnGenerate').addEventListener('click', () => {
+  let tx = ALL_TX.filter(t => SELECTED_VENDORS.has(t.vendedor || 'Sin asignar'));
+  const ivaOn = document.getElementById('ivaCheckbox').checked;
+  const rate = parseFloat(document.getElementById('ivaRate').value) || 12;
+  if(ivaOn) tx = tx.map(t => ({...t, total: t.total / (1 + rate/100)}));
+
+  const total = tx.reduce((s,t) => s + t.total, 0);
+  document.getElementById('cardsWrap').innerHTML = `
+    <div class="card"><div class="label">Total Vendido</div><div class="value">Q${total.toFixed(2)}</div></div>
+    <div class="card"><div class="label">Facturas</div><div class="value">${tx.length}</div></div>
+    <div class="card"><div class="label">Promedio</div><div class="value">Q${(tx.length ? total/tx.length : 0).toFixed(2)}</div></div>
+  `;
+  document.getElementById('results').style.display = 'block';
+});
+
+document.getElementById('btnPrintReport').addEventListener('click', () => window.print());
+
+// --- TAB 3: SUMADOR DE VALORES ---
+function procesarSumador() {
+  const texto = document.getElementById("sumEntrada").value;
+  const valores = texto.match(/-?\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|-?\d+(?:\.\d{1,2})?/g);
+  if (!valores) {
+    document.getElementById("sumSalida").value = "";
+    document.getElementById("sumTotal").textContent = "Q0.00";
+    return;
+  }
+  const numeros = valores.map(v => parseFloat(v.replace(/,/g, ""))).filter(n => !isNaN(n));
+  const resultado = numeros.map(n => n.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2})).join(" + ");
+  const total = numeros.reduce((a, b) => a + b, 0);
+  document.getElementById("sumSalida").value = resultado;
+  document.getElementById("sumTotal").textContent = "Q" + total.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function copiarSumador() {
+  const salida = document.getElementById("sumSalida");
+  if (!salida.value) return alert("Primero procesa los valores.");
+  navigator.clipboard.writeText(salida.value);
+  alert("Resultado copiado al portapapeles.");
+}
+
+function limpiarSumador() {
+  document.getElementById("sumEntrada").value = "";
+  document.getElementById("sumSalida").value = "";
+  document.getElementById("sumTotal").textContent = "Q0.00";
+}
+</script>
+</body>
+</html>
