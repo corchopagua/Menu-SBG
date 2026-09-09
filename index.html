@@ -3,188 +3,806 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema de Herramientas SBG - Occidente</title>
-<!-- Librerías Externas requeridas por las herramientas -->
+<title>Herramientas SBG — Centro de Distribución Occidente</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-/* Fondos */
-  --bg: #F5F7F9;
+:root {
+  --bg: #F4F6F8;
   --panel: #FFFFFF;
-
-  /* Textos */
-  --ink: #202B3C;
-  --muted: #64748B;
-  --sub: #475569;
-
-  /* Colores institucionales */
-  --accent: #272756;       /* Azul índigo del encabezado */
-  --accent2: #0C4267;      /* Azul petróleo */
-  --accent-dark: #202044;  /* Índigo oscuro */
-
-  /* Elementos */
-  --line: #DCE3E9;
-  --accent-soft: #EAF2F7;
-
-  /* Barras / botones */
-  --bar: #0C4267;
-
-  /* Estados */
+  --primary: #29295B;
+  --primary-dark: #202047;
+  --secondary: #0E4968;
+  --secondary-dark: #09364D;
+  --ink: #172033;
+  --muted: #667085;
+  --sub: #475467;
+  --line: #E4E7EC;
+  --soft-blue: #EEF5F8;
+  --soft-indigo: #F0F0F8;
   --success: #287A62;
   --warning: #B7791F;
   --danger: #A92836;
-
-  /* Blanco */
+  --gold: #A98A4A;
   --white: #FFFFFF;
-
   --mono: "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow-sm: 0 1px 3px rgba(16,24,40,.06);
+  --shadow-md: 0 8px 24px rgba(16,24,40,.08);
+  --radius: 10px;
 }
-  .header-title {
-    font-size: 1.3rem;
-    font-family: 'Georgia', serif;
-    margin: 0 0 12px;
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", Inter, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* ==================== ENCABEZADO EJECUTIVO ==================== */
+
+.app-header {
+  background: var(--primary);
+  color: var(--white);
+  box-shadow: 0 2px 10px rgba(16,24,40,.16);
+}
+
+.top-header {
+  max-width: 1180px;
+  margin: auto;
+  min-height: 78px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  background: rgba(255,255,255,.05);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-text strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brand-text span {
+  font-size: 11px;
+  color: rgba(255,255,255,.66);
+  letter-spacing: .04em;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255,255,255,.72);
+  font-size: 11px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6BC49A;
+  box-shadow: 0 0 0 3px rgba(107,196,154,.12);
+}
+
+.navigation {
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 28px;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  flex: 0 0 auto;
+  background: transparent;
+  color: rgba(255,255,255,.66);
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 14px 20px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+  transition: .2s ease;
+}
+
+.nav-tab span {
+  font-size: 10px;
+  opacity: .55;
+  margin-right: 7px;
+}
+
+.nav-tab:hover {
+  color: white;
+  background: rgba(255,255,255,.05);
+}
+
+.nav-tab.active {
+  color: white;
+  background: rgba(255,255,255,.07);
+  border-bottom-color: white;
+}
+
+/* ==================== CONTENIDO ==================== */
+
+.tab-content {
+  display: none;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 28px 50px;
+}
+
+.tab-content.active { display: block; }
+
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.eyebrow {
+  color: var(--secondary);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  margin-bottom: 6px;
+}
+
+.page-heading h1 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+
+.page-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.page-badge {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+/* ==================== PANELES ==================== */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 23px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.panel h2 {
+  margin: 0 0 17px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.panel h2::before {
+  content: "";
+  width: 3px;
+  height: 15px;
+  background: var(--secondary);
+  border-radius: 2px;
+}
+
+.subtitle {
+  color: var(--sub);
+  font-size: 13px;
+  margin: 0 0 20px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ==================== BOTONES ==================== */
+
+button {
+  font-family: inherit;
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--primary);
+  padding: 9px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: .2s ease;
+}
+
+button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+button.secondary {
+  background: var(--secondary);
+  border-color: var(--secondary);
+}
+
+button.secondary:hover {
+  background: var(--secondary-dark);
+  border-color: var(--secondary-dark);
+}
+
+button.del {
+  background: white;
+  color: var(--danger);
+  border: 1px solid #E5BFC4;
+}
+
+button.del:hover {
+  background: #FFF5F6;
+  border-color: #D99BA4;
+}
+
+.tiny-toggle {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 3px 7px;
+  font-size: 10px;
+  border-radius: 5px;
+  margin-top: 4px;
+  display: block;
+}
+
+.tiny-toggle:hover {
+  background: var(--soft-blue);
+  color: var(--secondary);
+  border-color: #B9CFDA;
+}
+
+/* ==================== FORMULARIOS ==================== */
+
+select,
+input[type=text],
+input[type=number],
+textarea {
+  font-family: inherit;
+}
+
+select,
+input[type=text],
+input[type=number] {
+  min-height: 38px;
+  padding: 8px 11px;
+  background: white;
+  border: 1px solid #D0D5DD;
+  border-radius: 7px;
+  color: var(--ink);
+  outline: none;
+  font-size: 13px;
+  transition: .2s ease;
+}
+
+select:focus,
+input[type=text]:focus,
+input[type=number]:focus,
+textarea:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(14,73,104,.10);
+}
+
+/* ==================== CALCULADORA ==================== */
+
+textarea.code-input {
+  width: 100%;
+  min-height: 140px;
+  font-family: var(--mono);
+  font-size: .84rem;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+  background: #F8FAFC;
+  color: var(--ink);
+}
+
+.manual-row {
+  display: grid;
+  grid-template-columns: 1.1fr 2fr .7fr .9fr .8fr 1.1fr auto;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: end;
+}
+
+.manual-row label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.public-val {
+  color: var(--secondary);
+  font-weight: 750;
+}
+
+.discount-badge {
+  display: inline-block;
+  background: var(--soft-indigo);
+  color: var(--primary);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.kit-badge {
+  display: inline-block;
+  background: var(--soft-blue);
+  color: var(--secondary);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.hint {
+  font-size: .77rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.dropzone {
+  border: 1.5px dashed #C9D4DC;
+  border-radius: 9px;
+  padding: 30px 22px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  background: #F8FAFC;
+  transition: .2s ease;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--secondary);
+  background: var(--soft-blue);
+}
+
+table.p-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .84rem;
+  overflow: hidden;
+}
+
+table.p-table th,
+table.p-table td {
+  padding: 10px 9px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+table.p-table th {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  background: #F8FAFC;
+}
+
+table.p-table tbody tr:hover {
+  background: #FAFCFD;
+}
+
+td.num,
+th.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+tfoot td {
+  font-weight: 750;
+  border-top: 2px solid var(--primary);
+}
+
+.print-header { display: none; }
+
+/* ==================== REPORTES ==================== */
+
+.upload-box {
+  border: 1.5px dashed #C9D4DC;
+  border-radius: 8px;
+  padding: 16px;
+  background: #F8FAFC;
+  max-width: 560px;
+}
+
+.filename {
+  font-size: 11.5px;
+  color: var(--primary-dark);
+  margin-top: 7px;
+  min-height: 14px;
+}
+
+.status-line {
+  font-size: 12.5px;
+  color: var(--sub);
+  margin-top: 8px;
+  min-height: 16px;
+}
+
+.status-line.error { color: var(--danger); }
+
+.period-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  background: white;
+}
+
+.seg button {
+  border: none;
+  border-right: 1px solid var(--line);
+  background: white;
+  color: var(--sub);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.seg button:last-child { border-right: none; }
+
+.seg button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.card {
+  position: relative;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--secondary);
+}
+
+.card .label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 700;
+}
+
+.card .value {
+  color: var(--primary);
+  font-size: 25px;
+  line-height: 1.2;
+  font-weight: 750;
+  margin-top: 8px;
+}
+
+table.data {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12.5px;
+  background: #fff;
+}
+
+table.data th,
+table.data td {
+  border: 1px solid var(--line);
+  padding: 8px 9px;
+  text-align: left;
+}
+
+table.data th {
+  background: #F5F7F9;
+  color: var(--sub);
+  font-weight: 700;
+}
+
+table.data td.num,
+table.data th.num {
+  text-align: right;
+  font-family: var(--mono);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-wrap { overflow-x: auto; }
+
+.bar-label {
+  font-size: 10px;
+  fill: var(--sub);
+}
+
+.report-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  margin-top: 6px;
+  border-top: 2px solid var(--primary);
+}
+
+/* ==================== SUMADOR ==================== */
+
+.sumador-ta {
+  width: 100%;
+  height: 220px;
+  padding: 13px;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+  background: #F8FAFC;
+  color: var(--ink);
+}
+
+.sumador-res {
+  height: 120px;
+  background: #fff;
+  font-family: var(--mono);
+}
+
+.total-sum {
+  font-size: 23px;
+  font-weight: 750;
+  margin-top: 15px;
+  color: var(--primary);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 900px) {
+  .manual-row {
+    grid-template-columns: repeat(2, 1fr);
   }
-  .nav-tabs {
-    display: flex;
-    gap: 8px;
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .top-header {
+    padding: 16px 18px;
+    min-height: auto;
+  }
+
+  .header-status {
+    display: none;
+  }
+
+  .navigation {
+    padding: 0 18px;
+  }
+
+  .nav-tab {
+    padding: 12px 14px 10px;
+    font-size: 12px;
+  }
+
+  .tab-content {
+    padding: 24px 16px 40px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-heading h1 {
+    font-size: 23px;
+  }
+
+  .page-badge {
+    display: none;
+  }
+
+  .manual-row {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  table.p-table {
+    display: block;
     overflow-x: auto;
   }
-  .nav-tab {
-    background: #3a342c;
-    color: #d2c9bd;
-    border: none;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 8px 8px 0 0;
-    transition: background 0.2s, color 0.2s;
-  }
-  .nav-tab:hover { background: #4a4338; color: #fff; }
-  .nav-tab.active { background: var(--bg); color: var(--ink); }
 
-  /* Contenedores de Tab */
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== IMPRESIÓN ==================== */
+
+@media print {
+  .no-print,
+  header {
+    display: none !important;
+  }
+
+  body {
+    padding: 0;
+    background: #fff;
+  }
+
   .tab-content {
-    display: none;
-    padding: 24px;
-    max-width: 1050px;
-    margin: 0 auto;
+    max-width: none;
+    padding: 0;
   }
-  .tab-content.active { display: block; }
 
-  /* Estilos Comunes */
   .panel {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 18px 20px;
-    margin-bottom: 18px;
-    box-shadow: 0 1px 2px rgba(0,0,0,.03);
-  }
-  .panel h2 {
-    font-size: 1rem;
-    margin: 0 0 12px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-  }
-  .subtitle { color: var(--sub); font-size: 13px; margin: 0 0 20px; }
-  button {
-    font-family: inherit;
-    background: var(--accent);
-    color: #fff;
     border: none;
-    padding: 9px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: .9rem;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: 10px;
   }
-  button.secondary { background: var(--accent2); }
-  button:hover { opacity: .9; }
 
-  /* Estilos Calculadora Precios */
-  textarea.code-input {
-    width: 100%; min-height: 140px; font-family: 'Courier New', monospace; font-size: .85rem;
-    padding: 10px; border: 1px solid var(--line); border-radius: 6px; resize: vertical; background: #fbfaf7;
+  .print-header {
+    display: block;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 10px;
   }
-  .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
-  label { font-size: .85rem; color: var(--muted); }
-  select, input[type=text], input[type=number] {
-    padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font-size: .9rem;
+
+  .print-header .company {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--primary);
   }
-  table.p-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-  table.p-table th, table.p-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; }
-  table.p-table th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; }
-  td.num, th.num { text-align: right; white-space: nowrap; }
-  tfoot td { font-weight: bold; border-top: 2px solid var(--ink); }
-  .discount-badge { display: inline-block; background: #f0ece3; color: var(--ink); padding: 3px 8px; border-radius: 4px; font-weight: bold; }
-  .kit-badge { display: inline-block; background: #eae2d3; color: var(--accent); padding: 3px 8px; border-radius: 4px; font-weight: bold; }
-  .tiny-toggle { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 3px 7px; font-size: .7rem; border-radius: 4px; margin-top: 4px; display: block; }
-  .manual-row { display: grid; grid-template-columns: 1.1fr 2fr .7fr .9fr .8fr 1.1fr auto; gap: 8px; margin-top: 10px; align-items: end; }
-  .public-val { color: var(--accent); font-weight: bold; }
-  .del { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 4px 8px; font-size: .75rem; }
-  .hint { font-size: .78rem; color: var(--muted); margin-top: 6px; }
-  .dropzone { border: 2px dashed var(--line); border-radius: 8px; padding: 26px; text-align: center; color: var(--muted); cursor: pointer; background: #fbfaf7; }
-  .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: #f7efe9; }
-  .print-header { display: none; }
 
-  /* Estilos Reportes de Ventas */
-  .upload-box { border: 1.5px dashed var(--line); border-radius: 6px; padding: 14px; background: #fafbfc; max-width: 520px; }
-  .filename { font-size: 11.5px; color: var(--accent-dark); margin-top: 6px; min-height: 14px; }
-  .status-line { font-size: 12.5px; color: var(--sub); margin-top: 8px; min-height: 16px; }
-  .status-line.error { color: #b3311e; }
-  .period-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
-  .seg { display: flex; border: 1px solid var(--accent); border-radius: 5px; overflow: hidden; }
-  .seg button { border: none; background: #fff; color: var(--accent-dark); padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-  .seg button.active { background: var(--accent); color: #fff; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; margin-bottom: 6px; }
-  .card { background: #fbfcfc; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
-  .card .label { font-size: 11px; color: var(--sub); text-transform: uppercase; }
-  .card .value { font-size: 19px; font-weight: 700; margin-top: 4px; }
-  table.data { border-collapse: collapse; width: 100%; font-size: 12.5px; background: #fff; }
-  table.data th, table.data td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; }
-  table.data th { background: #eef1f3; font-weight: 600; }
-  table.data td.num, table.data th.num { text-align: right; font-family: var(--mono); }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
-  .chart-wrap { overflow-x: auto; }
-  .bar-label { font-size: 10px; fill: var(--sub); }
-  .report-footer { display: flex; align-items: center; gap: 14px; padding: 16px 20px; margin-top: 6px; border-top: 2px solid var(--accent); }
-
-  /* Estilos Sumador */
-  .sumador-ta { width: 100%; height: 220px; padding: 12px; font-size: 15px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
-  .sumador-res { height: 120px; background: #fff; font-family: var(--mono); }
-  .total-sum { font-size: 22px; font-weight: bold; margin-top: 15px; color: var(--accent); }
-
-  /* Impresión */
-  @media print {
-    .no-print, header { display: none !important; }
-    body { padding: 0; background: #fff; }
-    .panel { border: none; box-shadow: none; padding: 0; margin-bottom: 10px; }
-    .print-header { display: block; margin-bottom: 16px; border-bottom: 2px solid #2b2620; padding-bottom: 10px; }
-    .print-header .company { font-weight: bold; font-size: 1.1rem; }
-    .print-header .meta { color: #8a8175; font-size: .85rem; margin-top: 4px; }
+  .print-header .meta {
+    color: var(--muted);
+    font-size: .85rem;
+    margin-top: 4px;
   }
+}
 </style>
+
 </head>
 <body>
 
-<header class="no-print">
-  <div class="header-title">Sociedad Bíblica de Guatemala — Centro de Distribución Occidente</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="openTab('tab-precios', this)">1. Calculadora de Precios</button>
-    <button class="nav-tab" onclick="openTab('tab-ventas', this)">2. Reporte de Ventas</button>
-    <button class="nav-tab" onclick="openTab('tab-sumador', this)">3. Sumador de Valores</button>
+<header class="app-header no-print">
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-mark">SBG</div>
+      <div class="brand-text">
+        <strong>Sociedad Bíblica de Guatemala</strong>
+        <span>Centro de Distribución Occidente · Herramientas de gestión</span>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <span class="status-dot"></span>
+      Sistema interno
+    </div>
+  </div>
+
+  <div class="navigation">
+    <button class="nav-tab active" onclick="openTab('tab-precios', this)">
+      <span>01</span>Calculadora de precios
+    </button>
+    <button class="nav-tab" onclick="openTab('tab-ventas', this)">
+      <span>02</span>Reporte de ventas
+    </button>
+    <button class="nav-tab" onclick="openTab('tab-sumador', this)">
+      <span>03</span>Sumador de valores
+    </button>
   </div>
 </header>
 
 <!-- ==================== TAB 1: CALCULADORA DE PRECIOS ==================== -->
 <div id="tab-precios" class="tab-content active">
-  <h1 class="no-print" style="font-size:1.5rem; margin:0 0 4px;">Calculadora de Precio Público</h1>
-  <div class="sub no-print">Subí el PDF de la factura/cotización o pegá el texto para calcular el precio público.</div>
+  <div class="page-heading no-print">
+    <div>
+      <div class="eyebrow">Herramienta 01 · Gestión comercial</div>
+      <h1>Calculadora de Precio Público</h1>
+      <p>Convierte precios con descuento a precio público desde facturas y cotizaciones.</p>
+    </div>
+    <div class="page-badge">SBG · OCCIDENTE</div>
+  </div>
 
   <div class="panel no-print">
     <h2>1. Subir factura (PDF)</h2>
@@ -241,8 +859,14 @@
 
 <!-- ==================== TAB 2: REPORTE DE VENTAS ==================== -->
 <div id="tab-ventas" class="tab-content">
-  <h1 style="font-size:20px; margin:0 0 4px;">Reporte de Ventas por Periodo</h1>
-  <p class="subtitle">Sube tu Reporte de Ventas mensual (.xlsx) y genera el resumen de ventas.</p>
+  <div class="page-heading no-print">
+    <div>
+      <div class="eyebrow">Herramienta 02 · Inteligencia comercial</div>
+      <h1>Reporte de Ventas por Periodo</h1>
+      <p>Analiza ventas, facturas, vendedores y comportamiento comercial a partir de Excel.</p>
+    </div>
+    <div class="page-badge">ANÁLISIS · SBG</div>
+  </div>
 
   <div class="panel no-print">
     <h2>1. Sube el archivo</h2>
@@ -348,8 +972,14 @@
 
 <!-- ==================== TAB 3: SUMADOR DE VALORES ==================== -->
 <div id="tab-sumador" class="tab-content">
-  <h1 style="font-size:1.5rem; margin:0 0 4px;">Sumador de Valores</h1>
-  <p class="subtitle">Pegá tus valores uno debajo del otro. Podés incluir Q, comas o tablas copiadas desde Excel.</p>
+  <div class="page-heading no-print">
+    <div>
+      <div class="eyebrow">Herramienta 03 · Operación administrativa</div>
+      <h1>Sumador de Valores</h1>
+      <p>Procesa valores individuales, montos en quetzales y datos copiados desde Excel.</p>
+    </div>
+    <div class="page-badge">OPERACIÓN · SBG</div>
+  </div>
 
   <div class="panel">
     <textarea id="sumEntrada" class="sumador-ta" placeholder="Ejemplo:&#10;Q1,250.00&#10;Q500.00&#10;2,350.50"></textarea>
@@ -367,6 +997,7 @@
 </div>
 
 <!-- Script Principal y Lógica Integrada -->
+
 <script>
 // --- LÓGICA DE NAVEGACIÓN ENTRE PESTAÑAS ---
 function openTab(tabId, btn) {
