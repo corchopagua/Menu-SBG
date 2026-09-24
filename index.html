@@ -626,7 +626,7 @@ table.data th.num {
 
 .sumador-ta {
   width: 100%;
-  height: 220px;
+  height: 180px;
   padding: 13px;
   font-size: 15px;
   border: 1px solid var(--line);
@@ -637,9 +637,10 @@ table.data th.num {
 }
 
 .sumador-res {
-  height: 120px;
+  height: 100px;
   background: #fff;
   font-family: var(--mono);
+  word-break: break-all;
 }
 
 .total-sum {
@@ -975,7 +976,7 @@ table.data th.num {
     <div>
       <div class="eyebrow">Herramienta 03 · Operación administrativa</div>
       <h1>Sumador de Valores</h1>
-      <p>Procesa valores individuales, montos en quetzales y datos copiados desde Excel.</p>
+      <p>Procesa valores individuales, montos en quetzales y genera una cadena conectada con el signo + para Excel.</p>
     </div>
     <div class="page-badge">OPERACIÓN · SBG</div>
   </div>
@@ -983,12 +984,12 @@ table.data th.num {
   <div class="panel">
     <textarea id="sumEntrada" class="sumador-ta" placeholder="Ejemplo:&#10;Q1,250.00&#10;Q500.00&#10;2,350.50"></textarea>
     <div class="row">
-      <button onclick="procesarSumador()">Procesar valores</button>
+      <button onclick="procesarSumador()">Procesar valores (+)</button>
       <button class="secondary" onclick="copiarSumador()">Copiar resultado</button>
       <button class="del" style="padding:9px 16px;" onclick="limpiarSumador()">Limpiar</button>
     </div>
     <div style="margin-top:20px;">
-      <label style="font-weight:bold; display:block; margin-bottom:6px;">Resultado para Excel:</label>
+      <label style="font-weight:bold; display:block; margin-bottom:6px;">Cadena de suma para Excel (valor+valor):</label>
       <textarea id="sumSalida" class="sumador-ta sumador-res" readonly></textarea>
       <div class="total-sum">Total: <span id="sumTotal">Q0.00</span></div>
     </div>
@@ -1198,7 +1199,7 @@ document.getElementById('addManualBtn').addEventListener('click', () => {
   renderPrecios();
 });
 
-// --- TAB 3: FUNCIONES DEL SUMADOR DE VALORES ---
+// --- TAB 3: FUNCIONES DEL SUMADOR DE VALORES CON SIGNO (+) ---
 function procesarSumador() {
   const entrada = document.getElementById('sumEntrada').value;
   if (!entrada.trim()) {
@@ -1223,7 +1224,8 @@ function procesarSumador() {
     }
   });
 
-  document.getElementById('sumSalida').value = valoresLimpios.join('\n');
+  // Une todos los valores procesados con el signo "+"
+  document.getElementById('sumSalida').value = valoresLimpios.join('+');
   document.getElementById('sumTotal').textContent = money(sumaTotal);
 }
 
@@ -1232,10 +1234,10 @@ function copiarSumador() {
   if (!salida.value) return;
   salida.select();
   navigator.clipboard.writeText(salida.value).then(() => {
-    alert('Valores copiados al portapapeles');
+    alert('Cadena de suma copiada al portapapeles');
   }).catch(() => {
     document.execCommand('copy');
-    alert('Valores copiados al portapapeles');
+    alert('Cadena de suma copiada al portapapeles');
   });
 }
 
