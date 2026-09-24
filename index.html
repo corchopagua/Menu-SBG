@@ -839,14 +839,13 @@ table.data th.num {
   </div>
 
   <div class="panel">
-    <div class="row no-print" style="justify-content:space-between; margin-top:0;">
+    <div class="row no-print" style="justify-space-between; margin-top:0;">
       <h2 style="margin:0;">3. Resultado</h2>
       <div class="row" style="margin:0;">
         <label>Cliente / Referencia:
           <input type="text" id="clientRef" placeholder="Nombre del cliente">
         </label>
         <button id="printBtn" class="secondary">Imprimir / PDF</button>
-        <button id="whatsappBtn" class="secondary">Compartir WhatsApp</button>
       </div>
     </div>
     <div class="print-header">
@@ -997,7 +996,6 @@ table.data th.num {
 </div>
 
 <!-- Script Principal y Lógica Integrada -->
-
 <script>
 // --- LÓGICA DE NAVEGACIÓN ENTRE PESTAÑAS ---
 function openTab(tabId, btn) {
@@ -1009,7 +1007,6 @@ function openTab(tabId, btn) {
 
 // --- TAB 1: CALCULADORA DE PRECIOS ---
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-// Se agregaron y ordenaron los descuentos solicitados (20, 40, 42, 44, 45)
 const DISCOUNTS = [15,20,25,30,32,35,39,40,42,44,45,46,48];
 let items = [];
 
@@ -1200,6 +1197,53 @@ document.getElementById('addManualBtn').addEventListener('click', () => {
   items.push({code, desc, qty, price, override: (discount !== globalD) ? discount : null, convert: !document.getElementById('mKit').checked});
   renderPrecios();
 });
+
+// --- TAB 3: FUNCIONES DEL SUMADOR DE VALORES ---
+function procesarSumador() {
+  const entrada = document.getElementById('sumEntrada').value;
+  if (!entrada.trim()) {
+    document.getElementById('sumSalida').value = '';
+    document.getElementById('sumTotal').textContent = 'Q0.00';
+    return;
+  }
+
+  const lineas = entrada.split('\n');
+  let valoresLimpios = [];
+  let sumaTotal = 0;
+
+  lineas.forEach(linea => {
+    // Elimina la letra 'Q', comas y espacios vacíos
+    let numStr = linea.replace(/Q/gi, '').replace(/,/g, '').trim();
+    if (numStr !== '') {
+      let val = parseFloat(numStr);
+      if (!isNaN(val)) {
+        valoresLimpios.push(val.toFixed(2));
+        sumaTotal += val;
+      }
+    }
+  });
+
+  document.getElementById('sumSalida').value = valoresLimpios.join('\n');
+  document.getElementById('sumTotal').textContent = money(sumaTotal);
+}
+
+function copiarSumador() {
+  const salida = document.getElementById('sumSalida');
+  if (!salida.value) return;
+  salida.select();
+  navigator.clipboard.writeText(salida.value).then(() => {
+    alert('Valores copiados al portapapeles');
+  }).catch(() => {
+    document.execCommand('copy');
+    alert('Valores copiados al portapapeles');
+  });
+}
+
+function limpiarSumador() {
+  document.getElementById('sumEntrada').value = '';
+  document.getElementById('sumSalida').value = '';
+  document.getElementById('sumTotal').textContent = 'Q0.00';
+}
 </script>
 </body>
 </html>
